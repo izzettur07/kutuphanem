@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+/* Tailwind v4: class-based dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── StockTaper color system ── */
+:root {
+  --st-bg: #FAF3E8;
+  --st-bg-alt: #F0E6D3;
+  --st-text: #1A1A1A;
+  --st-text-light: #6B6B6B;
+  --st-text-muted: #9B9B9B;
+  --st-border: #1A1A1A;
+  --st-accent-green: #2D8B4E;
+  --st-accent-red: #C0392B;
+  --st-accent-blue: #2471A3;
+  --st-accent-amber: #D4A017;
+  --st-accent-purple: #7D3C98;
+  --st-scrollbar-track: #F0E6D3;
+  --st-scrollbar-thumb: #1A1A1A;
+  --st-selection-bg: #1A1A1A;
+  --st-selection-text: #FAF3E8;
+  --st-grid-stroke: #CCCCCC;
+}
+
+.dark {
+  --st-bg: #1A1714;
+  --st-bg-alt: #2A2520;
+  --st-text: #E8DFD0;
+  --st-text-light: #A89F90;
+  --st-text-muted: #7A7060;
+  --st-border: #E8DFD0;
+  --st-accent-green: #3DAF64;
+  --st-accent-red: #E05A4F;
+  --st-accent-blue: #4A9FD9;
+  --st-accent-amber: #E8B830;
+  --st-accent-purple: #A35CC0;
+  --st-scrollbar-track: #2A2520;
+  --st-scrollbar-thumb: #E8DFD0;
+  --st-selection-bg: #E8DFD0;
+  --st-selection-text: #1A1714;
+  --st-grid-stroke: #444444;
+}
+
+/* ── Tailwind v4 theme tokens ── */
+@theme {
+  --color-paper: #FAF3E8;
+  --color-paper-dark: #F0E6D3;
+  --color-ink: #1A1A1A;
+  --color-ink-light: #6B6B6B;
+  --color-ink-muted: #9B9B9B;
+  --color-accent-green: #2D8B4E;
+  --color-accent-red: #C0392B;
+  --color-accent-blue: #2471A3;
+  --color-accent-amber: #D4A017;
+  --color-accent-purple: #7D3C98;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+}
+
+/* ── Global resets ── */
+* {
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  border-radius: 0 !important;
+}
+
+body {
+  background: var(--st-bg);
+  color: var(--st-text);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Selection ── */
+::selection {
+  background: var(--st-selection-bg);
+  color: var(--st-selection-text);
+}
+
+/* ── Scrollbar — retro ── */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--st-scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--st-scrollbar-thumb); border-radius: 0 !important; }
+
+/* ── Recharts overrides ── */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke-dasharray: 4 4;
+  stroke: var(--st-grid-stroke);
+}
+
+.recharts-bar-rectangle rect {
+  rx: 0;
+  ry: 0;
+}
+
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  font-family: 'IBM Plex Mono', monospace !important;
+  border: 2px solid var(--st-border) !important;
+  border-radius: 0 !important;
+  background: var(--st-bg) !important;
+  color: var(--st-text) !important;
+}
