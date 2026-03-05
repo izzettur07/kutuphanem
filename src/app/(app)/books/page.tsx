@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Plus } from "lucide-react";
 import { BookSearch } from "./book-search";
+import { DeleteBookButton } from "./delete-book-button";
 
 interface BooksPageProps {
   searchParams: Promise<{
@@ -162,25 +163,30 @@ export default async function BooksPage({ searchParams }: BooksPageProps) {
               return (
                 <Link key={book.id} href={`/books/${book.id}`}>
                   <Card className={`h-full transition-opacity duration-150 hover:opacity-80 ${colorClass}`}>
-                    <div className="flex flex-col gap-2">
-                      <p className="text-sm font-semibold text-ink leading-tight">
-                        {book.title}
-                      </p>
-                      <p className="text-xs text-ink-muted">{book.author}</p>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {book.category && (
-                          <Badge variant="blue">{book.category}</Badge>
-                        )}
-                        {book.language && book.language !== "Türkçe" && (
-                          <Badge variant="purple">{book.language}</Badge>
+                    <div className="flex gap-2">
+                      <div className="flex-1 flex flex-col gap-2 min-w-0">
+                        <p className="text-sm font-semibold text-ink leading-tight">
+                          {book.title}
+                        </p>
+                        <p className="text-xs text-ink-muted">{book.author}</p>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {book.category && (
+                            <Badge variant="blue">{book.category}</Badge>
+                          )}
+                          {book.language && book.language !== "Türkçe" && (
+                            <Badge variant="purple">{book.language}</Badge>
+                          )}
+                        </div>
+                        {book.shelves && (
+                          <p className="text-[10px] text-ink-muted mt-1">
+                            {(book.shelves as { name: string }).name}
+                            {book.shelf_row ? ` · Raf ${book.shelf_row}` : ""}
+                          </p>
                         )}
                       </div>
-                      {book.shelves && (
-                        <p className="text-[10px] text-ink-muted mt-1">
-                          {(book.shelves as { name: string }).name}
-                          {book.shelf_row ? ` · Raf ${book.shelf_row}` : ""}
-                        </p>
-                      )}
+                      <div className="flex-shrink-0">
+                        <DeleteBookButton bookId={book.id} bookTitle={book.title} />
+                      </div>
                     </div>
                   </Card>
                 </Link>

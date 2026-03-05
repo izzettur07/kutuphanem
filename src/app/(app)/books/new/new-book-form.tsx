@@ -168,6 +168,36 @@ export function NewBookForm({ categories, languages, shelves }: Props) {
       return;
     }
 
+    // Check for duplicate ISBN
+    if (form.isbn) {
+      const { data: existingByIsbn } = await supabase
+        .from("books")
+        .select("id, title")
+        .eq("isbn", form.isbn)
+        .limit(1);
+
+      if (existingByIsbn && existingByIsbn.length > 0) {
+        setError(`Bu ISBN ile zaten bir kitap mevcut: "${existingByIsbn[0].title}"`);
+        setLoading(false);
+        return;
+      }
+    }
+
+    // Check for duplicate title
+    {
+      const { data: existingByTitle } = await supabase
+        .from("books")
+        .select("id, title, author")
+        .ilike("title", form.title)
+        .limit(1);
+
+      if (existingByTitle && existingByTitle.length > 0) {
+        setError(`Bu isimde zaten bir kitap mevcut: "${existingByTitle[0].title}" — ${existingByTitle[0].author}`);
+        setLoading(false);
+        return;
+      }
+    }
+
     const { data: newBook, error: insertError } = await supabase
       .from("books")
       .insert({
