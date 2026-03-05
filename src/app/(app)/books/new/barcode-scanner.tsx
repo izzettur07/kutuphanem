@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
-import { Button } from "@/components/ui/Button";
 import { X } from "lucide-react";
 
 interface BarcodeScannerProps {
@@ -13,7 +12,10 @@ interface BarcodeScannerProps {
 export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [error, setError] = useState("");
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [scannedCode, setScannedCode] = useState("");
+  const detectedRef = useRef(false);
+  const onDetectedRef = useRef(onDetected);
+  onDetectedRef.current = onDetected;
 
   useEffect(() => {
     const scannerId = "barcode-reader";
@@ -29,14 +31,20 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
           {
             fps: 10,
             qrbox: { width: 280, height: 120 },
+            aspectRatio: 1.5,
           },
           (decodedText) => {
+            if (detectedRef.current) return;
             // Clean ISBN: remove dashes and spaces
             const cleaned = decodedText.replace(/[-\s]/g, "");
-            // Validate it looks like an ISBN (10 or 13 digits)
+            // Accept any numeric barcode (ISBN-10 or ISBN-13 or EAN)
             if (/^\d{10,13}$/.test(cleaned)) {
-              onDetected(cleaned);
-              stopScanner();
+              detectedRef.current = true;
+              setScannedCode(cleaned);
+              // Stop scanner and notify parent
+              stopScanner().then(() => {
+                onDetectedRef.current(cleaned);
+              });
             }
           },
           () => {
@@ -45,7 +53,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
         );
       } catch (err) {
         console.error("Scanner error:", err);
-        setError("Kamera erişimi sağlanamadı. Lütfen kamera izni verin.");
+        setError("Kamera erişimi sağlanamadı. Lütfen kamera izni verin ve sayfayı yenileyin.");
       }
     }
 
@@ -53,6 +61,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
       if (scanner && scanner.isScanning) {
         try {
           await scanner.stop();
+          await scanner.clear();
         } catch {
           // ignore
         }
@@ -64,7 +73,8 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
     return () => {
       stopScanner();
     };
-  }, [onDetected]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="border-2 border-border p-3 space-y-3">
@@ -82,6 +92,10 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
 
       {error ? (
         <div className="text-xs text-accent-red py-4 text-center">{error}</div>
+      ) : scannedCode ? (
+        <p className="text-xs text-accent-green text-center py-2">
+          Barkod okundu: <span className="font-semibold">{scannedCode}</span>
+        </p>
       ) : (
         <p className="text-[10px] text-ink-muted text-center">
           Kitabın barkodunu kameraya gösterin
@@ -89,7 +103,6 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
       )}
 
       <div
-        ref={containerRef}
         id="barcode-reader"
         className="w-full overflow-hidden"
         style={{ minHeight: 200 }}

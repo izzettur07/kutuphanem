@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, lazy, Suspense } from "react";
+import { useState, useRef, lazy, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
@@ -35,7 +35,9 @@ export function NewBookForm({ categories, languages, shelves }: Props) {
   const [loading, setLoading] = useState(false);
   const [isbnLoading, setIsbnLoading] = useState(false);
   const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
+  const [scanInfo, setScanInfo] = useState("");
 
   const [form, setForm] = useState({
     title: "",
@@ -51,32 +53,21 @@ export function NewBookForm({ categories, languages, shelves }: Props) {
     status: "",
   });
 
+  // Use ref to avoid stale closure issues
+  const formRef = useRef(form);
+  formRef.current = form;
+
   function setField(key: string, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  // Try to get best cover URL from multiple sources
-  async function fetchCoverUrl(isbn: string): Promise<string> {
-    // 1. Try Open Library covers (usually higher quality)
-    try {
-      const olUrl = `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg?default=false`;
-      const olRes = await fetch(olUrl, { method: "HEAD" });
-      if (olRes.ok) {
-        return olUrl;
-      }
-    } catch {
-      // fallback to Google
-    }
-
-    // 2. Fallback: return empty, Google Books thumbnail will be used from main lookup
-    return "";
-  }
-
-  async function lookupISBN(isbn?: string) {
-    const isbnToSearch = isbn || form.isbn;
+  async function lookupISBN(isbnParam?: string) {
+    const isbnToSearch = isbnParam || formRef.current.isbn;
     if (!isbnToSearch) return;
     setIsbnLoading(true);
     setError("");
+    setWarning("");
+    setScanInfo("");
 
     try {
       // Fetch from Google Books API
@@ -87,12 +78,17 @@ export function NewBookForm({ categories, languages, shelves }: Props) {
       const info = data.items?.[0]?.volumeInfo;
 
       if (!info) {
-        setError("ISBN bulunamadı.");
+        if (isbnParam) {
+          // Coming from barcode scanner
+          setError(`Barkod okundu: ${isbnToSearch} — Ancak bu ISBN için kitap bilgisi bulunamadı.`);
+        } else {
+          setError(`ISBN ${isbnToSearch} için kitap bilgisi bulunamadı.`);
+        }
         setIsbnLoading(false);
         return;
       }
 
-      // Try to get best quality cover
+      // Try to get best quality cover from Google Books
       const googleCover =
         info.imageLinks?.extraLarge ||
         info.imageLinks?.large ||
@@ -105,9 +101,20 @@ export function NewBookForm({ categories, languages, shelves }: Props) {
         ? googleCover.replace("http:", "https:")
         : "";
 
-      // Try Open Library for potentially better cover
-      const olCover = await fetchCoverUrl(isbnToSearch);
-      const bestCover = olCover || googleCoverHttps;
+      // Also try Open Library cover (direct image URL, no CORS HEAD check needed)
+      const olCoverUrl = `https://covers.openlibrary.org/b/isbn/${isbnToSearch}-L.jpg`;
+
+      // Use Open Library first, Google as fallback
+      // We'll set Open Library URL and let the img onError handle fallback
+      let bestCover = "";
+      if (googleCoverHttps) {
+        bestCover = googleCoverHttps;
+      }
+      // Prefer Open Library if available (direct URL, will test with img tag)
+      const olTestUrl = `https://covers.openlibrary.org/b/isbn/${isbnToSearch}-M.jpg`;
+      bestCover = bestCover || olTestUrl;
+
+      const coverFound = !!bestCover;
 
       setForm((prev) => ({
         ...prev,
@@ -124,27 +131,32 @@ export function NewBookForm({ categories, languages, shelves }: Props) {
               ? "İngilizce"
               : prev.language,
       }));
+
+      if (!coverFound) {
+        setWarning("Kitap bilgileri bulundu ancak kapak resmi bulunamadı.");
+      }
+
+      if (isbnParam) {
+        setScanInfo(`Barkod okundu: ${isbnToSearch} — Kitap bilgileri getirildi.`);
+      }
     } catch {
-      setError("ISBN arama hatası.");
+      setError("ISBN arama hatası. Lütfen tekrar deneyin.");
     }
 
     setIsbnLoading(false);
   }
 
-  const handleBarcodeDetected = useCallback(
-    (code: string) => {
-      setField("isbn", code);
-      setScannerOpen(false);
-      // Auto-search after barcode scan
-      lookupISBN(code);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  function handleBarcodeDetected(code: string) {
+    setForm((prev) => ({ ...prev, isbn: code }));
+    setScannerOpen(false);
+    setScanInfo(`Barkod okundu: ${code} — Aranıyor...`);
+    lookupISBN(code);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setWarning("");
     setLoading(true);
 
     const {
@@ -236,6 +248,11 @@ export function NewBookForm({ categories, languages, shelves }: Props) {
               </Button>
             </div>
 
+            {/* Scan info */}
+            {scanInfo && (
+              <p className="text-xs text-accent-blue">{scanInfo}</p>
+            )}
+
             {/* Barcode scanner */}
             {scannerOpen && (
               <Suspense
@@ -260,11 +277,18 @@ export function NewBookForm({ categories, languages, shelves }: Props) {
                   alt="Kapak önizleme"
                   className="w-16 h-24 object-cover border-2 border-border"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
+                    const img = e.target as HTMLImageElement;
+                    img.style.display = "none";
+                    setWarning("Kapak resmi yüklenemedi.");
                   }}
                 />
                 <span className="text-[10px] text-ink-muted">Kapak önizleme</span>
               </div>
+            )}
+
+            {/* Warning */}
+            {warning && (
+              <p className="text-xs text-accent-amber">{warning}</p>
             )}
 
             <div className="border-t border-dashed border-ink-muted" />
@@ -356,6 +380,7 @@ export function NewBookForm({ categories, languages, shelves }: Props) {
               placeholder="https://..."
             />
 
+            {/* Error */}
             {error && <p className="text-xs text-accent-red">{error}</p>}
 
             <Button type="submit" disabled={loading}>
