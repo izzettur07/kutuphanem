@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import type { Database } from "@/lib/supabase/types";
 
@@ -40,31 +40,69 @@ function BookNotes({ bookId, notes: initialNotes }: BookNotesProps) {
   const [noteText, setNoteText] = useState("");
   const [pageNumber, setPageNumber] = useState("");
   const [noteType, setNoteType] = useState("general");
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
 
-  async function handleAdd() {
+  function startEdit(note: Note) {
+    setEditingNoteId(note.id);
+    setNoteText(note.note_text);
+    setPageNumber(note.page_number ? String(note.page_number) : "");
+    setNoteType(note.note_type);
+  }
+
+  function cancelEdit() {
+    setEditingNoteId(null);
+    setNoteText("");
+    setPageNumber("");
+    setNoteType("general");
+  }
+
+  async function handleAddOrUpdate() {
     if (!noteText.trim()) return;
     setLoading(true);
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
-    const { data, error } = await supabase
-      .from("user_book_notes")
-      .insert({
-        user_id: user.id,
-        book_id: bookId,
-        note_text: noteText.trim(),
-        page_number: pageNumber ? Number(pageNumber) : null,
-        note_type: noteType as "general" | "quote" | "thought" | "summary",
-      })
-      .select()
-      .single();
+    if (editingNoteId) {
+      // Update existing note
+      const { data, error } = await supabase
+        .from("user_book_notes")
+        .update({
+          note_text: noteText.trim(),
+          page_number: pageNumber ? Number(pageNumber) : null,
+          note_type: noteType as "general" | "quote" | "thought" | "summary",
+        })
+        .eq("id", editingNoteId)
+        .select()
+        .single();
 
-    if (!error && data) {
-      setNotes([data, ...notes]);
-      setNoteText("");
-      setPageNumber("");
-      setNoteType("general");
+      if (!error && data) {
+        setNotes(notes.map((n) => (n.id === editingNoteId ? data : n)));
+        cancelEdit();
+      }
+    } else {
+      // Insert new note
+      const { data, error } = await supabase
+        .from("user_book_notes")
+        .insert({
+          user_id: user.id,
+          book_id: bookId,
+          note_text: noteText.trim(),
+          page_number: pageNumber ? Number(pageNumber) : null,
+          note_type: noteType as "general" | "quote" | "thought" | "summary",
+        })
+        .select()
+        .single();
+
+      if (!error && data) {
+        setNotes([data, ...notes]);
+        setNoteText("");
+        setPageNumber("");
+        setNoteType("general");
+      }
     }
 
     setLoading(false);
@@ -79,21 +117,24 @@ function BookNotes({ bookId, notes: initialNotes }: BookNotesProps) {
 
     if (!error) {
       setNotes(notes.filter((n) => n.id !== noteId));
+      if (editingNoteId === noteId) {
+        cancelEdit();
+      }
     }
     router.refresh();
   }
 
   return (
     <div className="space-y-4">
-      {/* Add note form */}
+      {/* Add / Edit note form */}
       <div className="space-y-3">
         <Textarea
           id="note_text"
           value={noteText}
           onChange={(e) => setNoteText(e.target.value)}
-          placeholder="Not ekle..."
+          placeholder={editingNoteId ? "Notu düzenle..." : "Not ekle..."}
         />
-        <div className="flex gap-2 items-end">
+        <div className="flex gap-2 items-end flex-wrap">
           <Input
             id="page_number"
             label="Sayfa"
@@ -113,11 +154,21 @@ function BookNotes({ bookId, notes: initialNotes }: BookNotesProps) {
           />
           <Button
             size="sm"
-            onClick={handleAdd}
+            onClick={handleAddOrUpdate}
             disabled={loading || !noteText.trim()}
           >
-            {loading ? "..." : "Ekle"}
+            {loading ? "..." : editingNoteId ? "Kaydet" : "Ekle"}
           </Button>
+          {editingNoteId && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={cancelEdit}
+              disabled={loading}
+            >
+              İptal
+            </Button>
+          )}
         </div>
       </div>
 
@@ -128,7 +179,9 @@ function BookNotes({ bookId, notes: initialNotes }: BookNotesProps) {
           {notes.map((note) => (
             <div
               key={note.id}
-              className="flex justify-between items-start gap-3"
+              className={`flex justify-between items-start gap-3 p-2 -mx-2 transition-colors duration-150 ${
+                editingNoteId === note.id ? "bg-paper-alt" : ""
+              }`}
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
@@ -148,12 +201,22 @@ function BookNotes({ bookId, notes: initialNotes }: BookNotesProps) {
                   {new Date(note.created_at).toLocaleDateString("tr-TR")}
                 </p>
               </div>
-              <button
-                onClick={() => handleDelete(note.id)}
-                className="text-ink-muted hover:text-accent-red transition-colors duration-150 cursor-pointer flex-shrink-0"
-              >
-                <Trash2 size={14} />
-              </button>
+              <div className="flex flex-col gap-1 flex-shrink-0">
+                <button
+                  onClick={() => startEdit(note)}
+                  className="text-ink-muted hover:text-accent-blue transition-colors duration-150 cursor-pointer"
+                  title="Düzenle"
+                >
+                  <Pencil size={14} />
+                </button>
+                <button
+                  onClick={() => handleDelete(note.id)}
+                  className="text-ink-muted hover:text-accent-red transition-colors duration-150 cursor-pointer"
+                  title="Sil"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
           ))}
         </div>

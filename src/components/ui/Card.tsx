@@ -4,10 +4,11 @@ interface CardProps {
 }
 
 function Card({ children, className = "" }: CardProps) {
+  const hasBg = /\bbg-/.test(className);
   return (
     <div
       className={`
-        bg-paper border-2 border-border p-4
+        ${hasBg ? "" : "bg-paper"} border-2 border-border p-4
         ${className}
       `}
     >

@@ -33,7 +33,7 @@ function Sidebar() {
         bg-paper border-r-2 border-border
       "
     >
-      <div className="p-4 border-b-2 border-border">
+      <div className="h-14 flex items-center px-4 border-b-2 border-border">
         <Link
           href="/dashboard"
           className="text-sm font-semibold uppercase tracking-[0.05em] text-ink"

@@ -25,6 +25,32 @@ export async function deleteLookupValue(id: number) {
   return { error: null };
 }
 
+export async function clearBookCategory(category: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("books")
+    .update({ category: null })
+    .eq("category", category);
+  if (error) return { error: error.message };
+  revalidatePath("/settings");
+  revalidatePath("/books");
+  revalidatePath("/books/new");
+  return { error: null };
+}
+
+export async function clearBookLanguage(language: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("books")
+    .update({ language: "Türkçe" })
+    .eq("language", language);
+  if (error) return { error: error.message };
+  revalidatePath("/settings");
+  revalidatePath("/books");
+  revalidatePath("/books/new");
+  return { error: null };
+}
+
 export async function addShelf(name: string, position: number, shelfCount: number) {
   const trimmed = name.trim();
   if (!trimmed) return { error: "İsim boş olamaz." };

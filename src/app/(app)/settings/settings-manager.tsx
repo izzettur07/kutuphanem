@@ -8,6 +8,8 @@ import { Plus, X, Pencil, Check } from "lucide-react";
 import {
   addLookupValue,
   deleteLookupValue,
+  clearBookCategory,
+  clearBookLanguage,
   addShelf,
   deleteShelf,
   updateShelf,
@@ -30,16 +32,22 @@ interface Props {
   categories: LookupValue[];
   languages: LookupValue[];
   shelves: Shelf[];
+  bookOnlyCategories: string[];
+  bookOnlyLanguages: string[];
 }
 
 function LookupSection({
   title,
   type,
   items,
+  bookOnlyItems = [],
+  onDeleteBookOnly,
 }: {
   title: string;
   type: "category" | "language";
   items: LookupValue[];
+  bookOnlyItems?: string[];
+  onDeleteBookOnly?: (value: string) => Promise<{ error: string | null } | undefined>;
 }) {
   const [newValue, setNewValue] = useState("");
   const [error, setError] = useState("");
@@ -47,9 +55,14 @@ function LookupSection({
 
   function handleAdd() {
     if (!newValue.trim()) return;
+    handleAddDirect(newValue.trim());
+  }
+
+  function handleAddDirect(value: string) {
+    if (!value.trim()) return;
     setError("");
     startTransition(async () => {
-      const result = await addLookupValue(type, newValue.trim());
+      const result = await addLookupValue(type, value.trim());
       if (result?.error) {
         setError(result.error);
       } else {
@@ -92,7 +105,7 @@ function LookupSection({
         )}
 
         {/* List */}
-        {items.length > 0 ? (
+        {items.length > 0 || bookOnlyItems.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {items.map((item) => (
               <div
@@ -108,6 +121,40 @@ function LookupSection({
                 >
                   <X size={12} />
                 </button>
+              </div>
+            ))}
+            {bookOnlyItems.map((value) => (
+              <div
+                key={`book-${value}`}
+                className="flex items-center gap-1.5 border-2 border-dashed border-ink-muted px-2 py-1"
+              >
+                <span className="text-xs text-ink-muted">{value}</span>
+                <button
+                  onClick={() => {
+                    handleAddDirect(value);
+                  }}
+                  disabled={pending}
+                  className="text-ink-muted hover:text-accent-green transition-colors duration-150"
+                  title="Listeye ekle"
+                >
+                  <Plus size={12} />
+                </button>
+                {onDeleteBookOnly && (
+                  <button
+                    onClick={() => {
+                      setError("");
+                      startTransition(async () => {
+                        const result = await onDeleteBookOnly(value);
+                        if (result?.error) setError(result.error);
+                      });
+                    }}
+                    disabled={pending}
+                    className="text-ink-muted hover:text-accent-red transition-colors duration-150"
+                    title="Kitaplardan kaldır"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -303,11 +350,11 @@ function ShelvesSection({ shelves }: { shelves: Shelf[] }) {
   );
 }
 
-export function SettingsManager({ categories, languages, shelves }: Props) {
+export function SettingsManager({ categories, languages, shelves, bookOnlyCategories, bookOnlyLanguages }: Props) {
   return (
     <div className="space-y-4">
-      <LookupSection title="Kategoriler" type="category" items={categories} />
-      <LookupSection title="Diller" type="language" items={languages} />
+      <LookupSection title="Kategoriler" type="category" items={categories} bookOnlyItems={bookOnlyCategories} onDeleteBookOnly={clearBookCategory} />
+      <LookupSection title="Diller" type="language" items={languages} bookOnlyItems={bookOnlyLanguages} onDeleteBookOnly={clearBookLanguage} />
       <ShelvesSection shelves={shelves} />
     </div>
   );

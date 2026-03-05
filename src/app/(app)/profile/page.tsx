@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { LogOut } from "lucide-react";
+import { BookExport } from "./book-export";
 import type { Database } from "@/lib/supabase/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -155,6 +156,19 @@ export default function ProfilePage() {
               <span className="font-semibold text-ink">{stats.total}</span>
             </div>
           </div>
+        </Card>
+
+        {/* Export */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Kitap Listemi Dışa Aktar</CardTitle>
+          </CardHeader>
+          <BookExport
+            username={username}
+            fullName={fullName}
+            stats={stats}
+            readingGoal={readingGoal}
+          />
         </Card>
 
         {/* Sign out */}
