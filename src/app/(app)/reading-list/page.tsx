@@ -65,7 +65,7 @@ export default async function ReadingListPage({ searchParams }: ReadingListPageP
                   <Card className="hover:border-accent-blue transition-colors duration-150 mb-3">
                     <div className="flex justify-between items-start gap-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-ink dark:text-paper leading-tight">
+                        <p className="text-sm font-semibold text-ink leading-tight">
                           {book.title}
                         </p>
                         <p className="text-xs text-ink-muted mt-0.5">{book.author}</p>

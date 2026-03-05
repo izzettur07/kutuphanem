@@ -8,7 +8,7 @@ interface BadgeProps {
 
 const variantStyles: Record<Variant, string> = {
   default:
-    "border-ink text-ink dark:border-paper dark:text-paper",
+    "border-border text-ink",
   green:
     "border-accent-green text-accent-green",
   red:

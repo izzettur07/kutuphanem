@@ -28,8 +28,8 @@ function ReadingListTabs({ tabs, counts, activeTab }: ReadingListTabsProps) {
             border-2 transition-colors duration-150 cursor-pointer
             ${
               activeTab === tab.key
-                ? "bg-ink text-paper border-ink dark:bg-paper dark:text-ink dark:border-paper"
-                : "bg-transparent text-ink border-ink hover:bg-ink hover:text-paper dark:text-paper dark:border-paper dark:hover:bg-paper dark:hover:text-ink"
+                ? "bg-ink text-paper border-border"
+                : "bg-transparent text-ink border-border hover:bg-ink hover:text-paper"
             }
           `}
         >

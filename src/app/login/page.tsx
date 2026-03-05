@@ -37,9 +37,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-paper dark:bg-paper-dark px-4">
+    <div className="min-h-screen flex items-center justify-center bg-paper px-4">
       <Card className="w-full max-w-sm">
-        <h1 className="text-lg font-semibold uppercase tracking-[0.05em] text-ink dark:text-paper mb-6">
+        <h1 className="text-lg font-semibold uppercase tracking-[0.05em] text-ink mb-6">
           Giriş Yap
         </h1>
 
@@ -72,11 +72,11 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <p className="mt-4 text-xs text-ink-muted dark:text-ink-muted text-center">
+        <p className="mt-4 text-xs text-ink-muted text-center">
           Hesabınız yok mu?{" "}
           <Link
             href="/register"
-            className="text-ink dark:text-paper underline"
+            className="text-ink underline"
           >
             Kayıt Ol
           </Link>

@@ -135,24 +135,24 @@ export default function ProfilePage() {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-ink-muted">Okunan kitap</span>
-              <span className="font-semibold text-ink dark:text-paper">{stats.read}</span>
+              <span className="font-semibold text-ink">{stats.read}</span>
             </div>
             <div className="border-t border-dashed border-ink-muted" />
             <div className="flex justify-between text-sm">
               <span className="text-ink-muted">Okunan / Hedef</span>
-              <span className="font-semibold text-ink dark:text-paper">
+              <span className="font-semibold text-ink">
                 {stats.read} / {readingGoal || "—"}
               </span>
             </div>
             <div className="border-t border-dashed border-ink-muted" />
             <div className="flex justify-between text-sm">
               <span className="text-ink-muted">Şu an okuyor</span>
-              <span className="font-semibold text-ink dark:text-paper">{stats.reading}</span>
+              <span className="font-semibold text-ink">{stats.reading}</span>
             </div>
             <div className="border-t border-dashed border-ink-muted" />
             <div className="flex justify-between text-sm">
               <span className="text-ink-muted">Toplam listede</span>
-              <span className="font-semibold text-ink dark:text-paper">{stats.total}</span>
+              <span className="font-semibold text-ink">{stats.total}</span>
             </div>
           </div>
         </Card>

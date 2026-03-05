@@ -23,11 +23,9 @@ function ThemeToggle() {
       aria-label="Tema değiştir"
       className="
         inline-flex items-center justify-center w-9 h-9
-        border-2 border-ink text-ink
+        border-2 border-border text-ink
         hover:bg-ink hover:text-paper
         transition-colors duration-150 cursor-pointer
-        dark:border-paper dark:text-paper
-        dark:hover:bg-paper dark:hover:text-ink
       "
     >
       {dark ? <Sun size={16} /> : <Moon size={16} />}

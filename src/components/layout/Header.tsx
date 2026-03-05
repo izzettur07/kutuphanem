@@ -14,15 +14,14 @@ function Header({ title, children }: HeaderProps) {
     <header
       className="
         flex items-center justify-between
-        px-4 py-3 border-b-2 border-ink
+        px-4 py-3 border-b-2 border-border
         bg-paper
-        dark:bg-paper-dark dark:border-paper
       "
     >
       <h1
         className="
           text-sm font-semibold uppercase tracking-[0.05em]
-          text-ink dark:text-paper
+          text-ink
         "
       >
         {title}
@@ -37,11 +36,9 @@ function Header({ title, children }: HeaderProps) {
           href="/profile"
           className="
             md:hidden inline-flex items-center justify-center w-9 h-9
-            border-2 border-ink text-ink
+            border-2 border-border text-ink
             hover:bg-ink hover:text-paper
             transition-colors duration-150
-            dark:border-paper dark:text-paper
-            dark:hover:bg-paper dark:hover:text-ink
           "
           aria-label="Profil"
         >

@@ -7,8 +7,7 @@ function Card({ children, className = "" }: CardProps) {
   return (
     <div
       className={`
-        bg-paper border-2 border-ink p-4
-        dark:bg-paper-dark dark:border-paper
+        bg-paper border-2 border-border p-4
         ${className}
       `}
     >
@@ -26,8 +25,7 @@ function CardHeader({ children, className = "" }: CardHeaderProps) {
   return (
     <div
       className={`
-        pb-3 mb-3 border-b-2 border-ink
-        dark:border-paper
+        pb-3 mb-3 border-b-2 border-border
         ${className}
       `}
     >
@@ -46,7 +44,6 @@ function CardTitle({ children, className = "" }: CardTitleProps) {
     <h3
       className={`
         text-sm font-semibold uppercase tracking-[0.05em] text-ink
-        dark:text-paper
         ${className}
       `}
     >

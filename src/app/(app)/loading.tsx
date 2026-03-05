@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/Card";
 function Skeleton({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`animate-pulse bg-paper-dark dark:bg-ink-muted ${className}`}
+      className={`animate-pulse bg-paper-alt ${className}`}
     />
   );
 }
@@ -12,7 +12,7 @@ export default function Loading() {
   return (
     <div>
       {/* Header skeleton */}
-      <div className="flex items-center justify-between px-4 py-3 border-b-2 border-ink dark:border-paper">
+      <div className="flex items-center justify-between px-4 py-3 border-b-2 border-border">
         <Skeleton className="h-4 w-32" />
         <Skeleton className="h-8 w-16" />
       </div>

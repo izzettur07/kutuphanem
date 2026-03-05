@@ -85,7 +85,7 @@ export default async function StatsPage() {
             { label: "Ort. Puan", value: avgRating },
           ].map((s) => (
             <Card key={s.label}>
-              <p className="text-2xl font-semibold text-ink dark:text-paper">{s.value}</p>
+              <p className="text-2xl font-semibold text-ink">{s.value}</p>
               <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
                 {s.label}
               </p>
