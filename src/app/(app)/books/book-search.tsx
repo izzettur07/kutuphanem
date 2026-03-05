@@ -8,7 +8,8 @@ import { Search, X } from "lucide-react";
 
 interface BookSearchProps {
   categories: string[];
-  shelves: { id: number; name: string }[];
+  languages: string[];
+  shelves: { id: string; name: string }[];
   currentParams: {
     q?: string;
     category?: string;
@@ -18,7 +19,7 @@ interface BookSearchProps {
   };
 }
 
-function BookSearch({ categories, shelves, currentParams }: BookSearchProps) {
+function BookSearch({ categories, languages, shelves, currentParams }: BookSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(currentParams.q ?? "");
@@ -76,10 +77,7 @@ function BookSearch({ categories, shelves, currentParams }: BookSearchProps) {
           className="w-auto min-w-[120px]"
         />
         <Select
-          options={[
-            { value: "Türkçe", label: "Türkçe" },
-            { value: "İngilizce", label: "İngilizce" },
-          ]}
+          options={languages.map((l) => ({ value: l, label: l }))}
           placeholder="Dil"
           value={currentParams.language ?? ""}
           onChange={(e) => updateParams("language", e.target.value)}

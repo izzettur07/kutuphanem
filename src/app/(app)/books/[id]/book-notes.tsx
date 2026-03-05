@@ -28,7 +28,7 @@ const noteTypeBadge: Record<string, "default" | "green" | "blue" | "amber" | "pu
 };
 
 interface BookNotesProps {
-  bookId: number;
+  bookId: string;
   notes: Note[];
 }
 
@@ -71,7 +71,7 @@ function BookNotes({ bookId, notes: initialNotes }: BookNotesProps) {
     router.refresh();
   }
 
-  async function handleDelete(noteId: number) {
+  async function handleDelete(noteId: string) {
     const { error } = await supabase
       .from("user_book_notes")
       .delete()
@@ -141,7 +141,7 @@ function BookNotes({ bookId, notes: initialNotes }: BookNotesProps) {
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-ink dark:text-paper whitespace-pre-wrap">
+                <p className="text-sm text-ink whitespace-pre-wrap">
                   {note.note_text}
                 </p>
                 <p className="text-[10px] text-ink-muted mt-1">

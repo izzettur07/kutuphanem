@@ -1,247 +1,45 @@
-"use client";
+import { createClient } from "@/lib/supabase/server";
+import { NewBookForm } from "./new-book-form";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Header } from "@/components/layout/Header";
-import { Card } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { Button } from "@/components/ui/Button";
-import { createClient } from "@/lib/supabase/client";
-import { Search } from "lucide-react";
+export const dynamic = "force-dynamic";
 
-export default function NewBookPage() {
-  const router = useRouter();
-  const supabase = createClient();
+export default async function NewBookPage() {
+  const supabase = await createClient();
 
-  const [loading, setLoading] = useState(false);
-  const [isbnLoading, setIsbnLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [shelves, setShelves] = useState<{ id: number; name: string }[]>([]);
-  const [shelvesLoaded, setShelvesLoaded] = useState(false);
+  const [
+    { data: lookupValues },
+    { data: shelves },
+    { data: bookCategories },
+    { data: bookLanguages },
+  ] = await Promise.all([
+    supabase.from("lookup_values").select("type, value").order("value"),
+    supabase.from("shelves").select("id, name").order("position"),
+    supabase.from("books").select("category").not("category", "is", null),
+    supabase.from("books").select("language").not("language", "is", null),
+  ]);
 
-  const [form, setForm] = useState({
-    title: "",
-    author: "",
-    publisher: "",
-    isbn: "",
-    category: "",
-    language: "Türkçe",
-    shelf_id: "",
-    shelf_row: "",
-    page_count: "",
-    cover_image_url: "",
-  });
+  const lookupCats = lookupValues?.filter((v) => v.type === "category").map((v) => v.value) ?? [];
+  const lookupLangs = lookupValues?.filter((v) => v.type === "language").map((v) => v.value) ?? [];
 
-  async function loadShelves() {
-    if (shelvesLoaded) return;
-    const { data } = await supabase
-      .from("shelves")
-      .select("id, name")
-      .order("position");
-    setShelves(data ?? []);
-    setShelvesLoaded(true);
-  }
+  const categories = [
+    ...new Set([
+      ...lookupCats,
+      ...(bookCategories?.map((b) => b.category).filter(Boolean) as string[] ?? []),
+    ]),
+  ].sort();
 
-  function setField(key: string, value: string) {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  }
-
-  async function lookupISBN() {
-    if (!form.isbn) return;
-    setIsbnLoading(true);
-    setError("");
-
-    try {
-      const res = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=isbn:${form.isbn}`
-      );
-      const data = await res.json();
-      const info = data.items?.[0]?.volumeInfo;
-
-      if (!info) {
-        setError("ISBN bulunamadı.");
-        setIsbnLoading(false);
-        return;
-      }
-
-      setForm((prev) => ({
-        ...prev,
-        title: info.title || prev.title,
-        author: info.authors?.join(", ") || prev.author,
-        publisher: info.publisher || prev.publisher,
-        page_count: info.pageCount ? String(info.pageCount) : prev.page_count,
-        cover_image_url:
-          info.imageLinks?.thumbnail?.replace("http:", "https:") ||
-          prev.cover_image_url,
-        language:
-          info.language === "tr"
-            ? "Türkçe"
-            : info.language === "en"
-              ? "İngilizce"
-              : prev.language,
-      }));
-    } catch {
-      setError("ISBN arama hatası.");
-    }
-
-    setIsbnLoading(false);
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setError("Oturum açmanız gerekiyor.");
-      setLoading(false);
-      return;
-    }
-
-    const { error: insertError } = await supabase.from("books").insert({
-      title: form.title,
-      author: form.author,
-      publisher: form.publisher || null,
-      isbn: form.isbn || null,
-      category: form.category || null,
-      language: form.language || "Türkçe",
-      shelf_id: form.shelf_id ? Number(form.shelf_id) : null,
-      shelf_row: form.shelf_row ? Number(form.shelf_row) : null,
-      page_count: form.page_count ? Number(form.page_count) : null,
-      cover_image_url: form.cover_image_url || null,
-      added_by: user.id,
-    });
-
-    if (insertError) {
-      setError(insertError.message);
-      setLoading(false);
-      return;
-    }
-
-    router.push("/books");
-    router.refresh();
-  }
+  const languages = [
+    ...new Set([
+      ...lookupLangs,
+      ...(bookLanguages?.map((b) => b.language).filter(Boolean) as string[] ?? []),
+    ]),
+  ].sort();
 
   return (
-    <>
-      <Header title="Kitap Ekle" />
-      <div className="p-4 max-w-lg">
-        <Card>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {/* ISBN lookup */}
-            <div className="flex gap-2 items-end">
-              <div className="flex-1">
-                <Input
-                  id="isbn"
-                  label="ISBN"
-                  value={form.isbn}
-                  onChange={(e) => setField("isbn", e.target.value)}
-                  placeholder="978-..."
-                />
-              </div>
-              <Button
-                type="button"
-                variant="secondary"
-                size="md"
-                onClick={lookupISBN}
-                disabled={isbnLoading || !form.isbn}
-              >
-                <Search size={14} className="mr-1" />
-                {isbnLoading ? "..." : "Ara"}
-              </Button>
-            </div>
-
-            <div className="border-t border-dashed border-ink-muted" />
-
-            <Input
-              id="title"
-              label="Başlık"
-              value={form.title}
-              onChange={(e) => setField("title", e.target.value)}
-              required
-            />
-            <Input
-              id="author"
-              label="Yazar"
-              value={form.author}
-              onChange={(e) => setField("author", e.target.value)}
-              required
-            />
-            <Input
-              id="publisher"
-              label="Yayınevi"
-              value={form.publisher}
-              onChange={(e) => setField("publisher", e.target.value)}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                id="category"
-                label="Kategori"
-                value={form.category}
-                onChange={(e) => setField("category", e.target.value)}
-                placeholder="Roman, Tarih..."
-              />
-              <Select
-                id="language"
-                label="Dil"
-                options={[
-                  { value: "Türkçe", label: "Türkçe" },
-                  { value: "İngilizce", label: "İngilizce" },
-                ]}
-                value={form.language}
-                onChange={(e) => setField("language", e.target.value)}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Select
-                id="shelf_id"
-                label="Raf"
-                options={shelves.map((s) => ({
-                  value: String(s.id),
-                  label: s.name,
-                }))}
-                placeholder="Seçin"
-                value={form.shelf_id}
-                onChange={(e) => setField("shelf_id", e.target.value)}
-                onFocus={loadShelves}
-              />
-              <Input
-                id="shelf_row"
-                label="Raf Sırası"
-                type="number"
-                value={form.shelf_row}
-                onChange={(e) => setField("shelf_row", e.target.value)}
-                min={1}
-              />
-            </div>
-            <Input
-              id="page_count"
-              label="Sayfa Sayısı"
-              type="number"
-              value={form.page_count}
-              onChange={(e) => setField("page_count", e.target.value)}
-              min={1}
-            />
-            <Input
-              id="cover_image_url"
-              label="Kapak URL"
-              value={form.cover_image_url}
-              onChange={(e) => setField("cover_image_url", e.target.value)}
-              placeholder="https://..."
-            />
-
-            {error && (
-              <p className="text-xs text-accent-red">{error}</p>
-            )}
-
-            <Button type="submit" disabled={loading}>
-              {loading ? "Kaydediliyor..." : "Kaydet"}
-            </Button>
-          </form>
-        </Card>
-      </div>
-    </>
+    <NewBookForm
+      categories={categories}
+      languages={languages.length > 0 ? languages : ["Türkçe", "İngilizce"]}
+      shelves={shelves ?? []}
+    />
   );
 }

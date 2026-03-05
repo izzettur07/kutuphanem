@@ -11,7 +11,7 @@ import type { Database } from "@/lib/supabase/types";
 type UserBook = Database["public"]["Tables"]["user_books"]["Row"];
 
 interface BookStatusFormProps {
-  bookId: number;
+  bookId: string;
   userBook: UserBook | null;
 }
 
@@ -71,7 +71,7 @@ function BookStatusForm({ bookId, userBook }: BookStatusFormProps) {
 
       {/* Rating */}
       <div className="flex flex-col gap-1">
-        <span className="text-xs font-semibold uppercase tracking-[0.05em] text-ink dark:text-paper">
+        <span className="text-xs font-semibold uppercase tracking-[0.05em] text-ink">
           Puan
         </span>
         <div className="flex gap-1">
@@ -102,7 +102,7 @@ function BookStatusForm({ bookId, userBook }: BookStatusFormProps) {
         className="
           inline-flex items-center gap-2 cursor-pointer
           text-xs font-semibold uppercase tracking-[0.05em]
-          text-ink dark:text-paper
+          text-ink
         "
       >
         <Heart

@@ -21,7 +21,7 @@ export default async function ShelvesPage() {
     .order("title");
 
   // Group books by shelf
-  const booksByShelf: Record<number, Record<number, typeof books>> = {};
+  const booksByShelf: Record<string, Record<number, typeof books>> = {};
   books?.forEach((book) => {
     if (!book.shelf_id) return;
     if (!booksByShelf[book.shelf_id]) booksByShelf[book.shelf_id] = {};
@@ -65,11 +65,9 @@ export default async function ShelvesPage() {
                                   className="
                                     inline-block px-2 py-1
                                     text-[10px] font-mono
-                                    border border-ink text-ink
+                                    border border-border text-ink
                                     hover:bg-ink hover:text-paper
                                     transition-colors duration-150
-                                    dark:border-paper dark:text-paper
-                                    dark:hover:bg-paper dark:hover:text-ink
                                     cursor-pointer
                                   "
                                   title={`${book.title} — ${book.author}`}

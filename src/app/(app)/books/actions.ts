@@ -15,10 +15,10 @@ export async function addBook(formData: FormData) {
     isbn: (formData.get("isbn") as string) || null,
     category: (formData.get("category") as string) || null,
     language: (formData.get("language") as string) || "Türkçe",
-    shelf_id: formData.get("shelf_id") ? Number(formData.get("shelf_id")) : null,
+    shelf_id: (formData.get("shelf_id") as string) || null,
     shelf_row: formData.get("shelf_row") ? Number(formData.get("shelf_row")) : null,
     page_count: formData.get("page_count") ? Number(formData.get("page_count")) : null,
-    cover_image_url: (formData.get("cover_image_url") as string) || null,
+    cover_url: (formData.get("cover_url") as string) || null,
     added_by: user.id,
   });
 
@@ -26,7 +26,7 @@ export async function addBook(formData: FormData) {
   revalidatePath("/books");
 }
 
-export async function updateBook(id: number, formData: FormData) {
+export async function updateBook(id: string, formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
@@ -40,10 +40,10 @@ export async function updateBook(id: number, formData: FormData) {
       isbn: (formData.get("isbn") as string) || null,
       category: (formData.get("category") as string) || null,
       language: (formData.get("language") as string) || "Türkçe",
-      shelf_id: formData.get("shelf_id") ? Number(formData.get("shelf_id")) : null,
+      shelf_id: (formData.get("shelf_id") as string) || null,
       shelf_row: formData.get("shelf_row") ? Number(formData.get("shelf_row")) : null,
       page_count: formData.get("page_count") ? Number(formData.get("page_count")) : null,
-      cover_image_url: (formData.get("cover_image_url") as string) || null,
+      cover_url: (formData.get("cover_url") as string) || null,
     })
     .eq("id", id);
 
@@ -52,7 +52,7 @@ export async function updateBook(id: number, formData: FormData) {
   revalidatePath(`/books/${id}`);
 }
 
-export async function deleteBook(id: number) {
+export async function deleteBook(id: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
@@ -62,7 +62,7 @@ export async function deleteBook(id: number) {
   revalidatePath("/books");
 }
 
-export async function upsertUserBook(bookId: number, data: {
+export async function upsertUserBook(bookId: string, data: {
   status: string;
   rating?: number | null;
   notes?: string | null;
@@ -94,7 +94,7 @@ export async function upsertUserBook(bookId: number, data: {
   revalidatePath("/dashboard");
 }
 
-export async function removeUserBook(bookId: number) {
+export async function removeUserBook(bookId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");

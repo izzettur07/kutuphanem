@@ -30,7 +30,7 @@ export type Database = {
       };
       shelves: {
         Row: {
-          id: number;
+          id: string;
           name: string;
           position: number;
           shelf_count: number;
@@ -50,20 +50,19 @@ export type Database = {
       };
       books: {
         Row: {
-          id: number;
+          id: string;
           title: string;
           author: string;
           publisher: string | null;
           isbn: string | null;
           category: string | null;
           language: string;
-          shelf_id: number | null;
+          shelf_id: string | null;
           shelf_row: number | null;
-          cover_image_url: string | null;
+          cover_url: string | null;
           page_count: number | null;
           added_by: string | null;
           created_at: string;
-          updated_at: string;
         };
         Insert: {
           title: string;
@@ -72,9 +71,9 @@ export type Database = {
           isbn?: string | null;
           category?: string | null;
           language?: string;
-          shelf_id?: number | null;
+          shelf_id?: string | null;
           shelf_row?: number | null;
-          cover_image_url?: string | null;
+          cover_url?: string | null;
           page_count?: number | null;
           added_by?: string | null;
         };
@@ -85,9 +84,9 @@ export type Database = {
           isbn?: string | null;
           category?: string | null;
           language?: string;
-          shelf_id?: number | null;
+          shelf_id?: string | null;
           shelf_row?: number | null;
-          cover_image_url?: string | null;
+          cover_url?: string | null;
           page_count?: number | null;
         };
         Relationships: [
@@ -102,9 +101,9 @@ export type Database = {
       };
       user_books: {
         Row: {
-          id: number;
+          id: string;
           user_id: string;
-          book_id: number;
+          book_id: string;
           status: "unread" | "reading" | "read" | "wishlist" | "to_read";
           rating: number | null;
           notes: string | null;
@@ -117,7 +116,7 @@ export type Database = {
         };
         Insert: {
           user_id: string;
-          book_id: number;
+          book_id: string;
           status?: "unread" | "reading" | "read" | "wishlist" | "to_read";
           rating?: number | null;
           notes?: string | null;
@@ -145,11 +144,27 @@ export type Database = {
           },
         ];
       };
-      user_book_notes: {
+      lookup_values: {
         Row: {
           id: number;
+          type: "category" | "language";
+          value: string;
+          created_at: string;
+        };
+        Insert: {
+          type: "category" | "language";
+          value: string;
+        };
+        Update: {
+          value?: string;
+        };
+        Relationships: [];
+      };
+      user_book_notes: {
+        Row: {
+          id: string;
           user_id: string;
-          book_id: number;
+          book_id: string;
           note_text: string;
           page_number: number | null;
           note_type: "general" | "quote" | "thought" | "summary";
@@ -158,7 +173,7 @@ export type Database = {
         };
         Insert: {
           user_id: string;
-          book_id: number;
+          book_id: string;
           note_text: string;
           page_number?: number | null;
           note_type?: "general" | "quote" | "thought" | "summary";
@@ -174,20 +189,19 @@ export type Database = {
     Views: {
       books_with_user_status: {
         Row: {
-          id: number;
+          id: string;
           title: string;
           author: string;
           publisher: string | null;
           isbn: string | null;
           category: string | null;
           language: string;
-          shelf_id: number | null;
+          shelf_id: string | null;
           shelf_row: number | null;
-          cover_image_url: string | null;
+          cover_url: string | null;
           page_count: number | null;
           added_by: string | null;
           created_at: string;
-          updated_at: string;
           shelf_name: string | null;
           user_status: "unread" | "reading" | "read" | "wishlist" | "to_read" | null;
           user_rating: number | null;

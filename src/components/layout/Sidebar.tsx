@@ -9,6 +9,7 @@ import {
   BarChart3,
   BookmarkCheck,
   User,
+  Settings,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/reading-list", label: "Okuma Listesi", icon: BookmarkCheck },
   { href: "/stats", label: "İstatistik", icon: BarChart3 },
   { href: "/profile", label: "Profil", icon: User },
+  { href: "/settings", label: "Ayarlar", icon: Settings },
 ];
 
 function Sidebar() {
@@ -28,14 +30,13 @@ function Sidebar() {
     <aside
       className="
         hidden md:flex md:flex-col md:w-56 md:min-h-screen
-        bg-paper border-r-2 border-ink
-        dark:bg-paper-dark dark:border-paper
+        bg-paper border-r-2 border-border
       "
     >
-      <div className="p-4 border-b-2 border-ink dark:border-paper">
+      <div className="p-4 border-b-2 border-border">
         <Link
           href="/dashboard"
-          className="text-sm font-semibold uppercase tracking-[0.05em] text-ink dark:text-paper"
+          className="text-sm font-semibold uppercase tracking-[0.05em] text-ink"
         >
           KÜTÜPHANEM
         </Link>
@@ -54,8 +55,8 @@ function Sidebar() {
                 transition-colors duration-150
                 ${
                   active
-                    ? "bg-ink text-paper dark:bg-paper dark:text-ink"
-                    : "text-ink hover:bg-ink hover:text-paper dark:text-paper dark:hover:bg-paper dark:hover:text-ink"
+                    ? "bg-ink text-paper"
+                    : "text-ink hover:bg-ink hover:text-paper"
                 }
               `}
             >
@@ -66,7 +67,7 @@ function Sidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t-2 border-ink dark:border-paper">
+      <div className="p-4 border-t-2 border-border">
         <ThemeToggle />
       </div>
     </aside>

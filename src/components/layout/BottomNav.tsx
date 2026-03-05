@@ -8,6 +8,7 @@ import {
   Library,
   BarChart3,
   BookmarkCheck,
+  Settings,
 } from "lucide-react";
 
 const navItems = [
@@ -16,6 +17,7 @@ const navItems = [
   { href: "/shelves", label: "Raflar", icon: Library },
   { href: "/reading-list", label: "Liste", icon: BookmarkCheck },
   { href: "/stats", label: "İstatistik", icon: BarChart3 },
+  { href: "/settings", label: "Ayarlar", icon: Settings },
 ];
 
 function BottomNav() {
@@ -26,9 +28,8 @@ function BottomNav() {
       className="
         fixed bottom-0 left-0 right-0 z-50
         flex items-center justify-around
-        h-14 bg-paper border-t-2 border-ink
+        h-14 bg-paper border-t-2 border-border
         md:hidden
-        dark:bg-paper-dark dark:border-paper
       "
     >
       {navItems.map(({ href, label, icon: Icon }) => {
@@ -43,8 +44,8 @@ function BottomNav() {
               transition-colors duration-150
               ${
                 active
-                  ? "text-ink dark:text-paper"
-                  : "text-ink-muted hover:text-ink dark:text-ink-muted dark:hover:text-paper"
+                  ? "text-ink"
+                  : "text-ink-muted hover:text-ink"
               }
             `}
           >
