@@ -37,6 +37,7 @@ export function NewBookForm({ categories, languages, shelves }: Props) {
   const [error, setError] = useState("");
   const [warning, setWarning] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
+  const [scannerKey, setScannerKey] = useState(0);
   const [scanInfo, setScanInfo] = useState("");
 
   const [form, setForm] = useState({
@@ -271,10 +272,18 @@ export function NewBookForm({ categories, languages, shelves }: Props) {
                 type="button"
                 variant="secondary"
                 size="md"
-                onClick={() => setScannerOpen(!scannerOpen)}
+                onClick={() => {
+                  if (scannerOpen) {
+                    setScannerOpen(false);
+                  } else {
+                    // Increment key to force fresh mount
+                    setScannerKey((k) => k + 1);
+                    setScannerOpen(true);
+                  }
+                }}
               >
                 <ScanBarcode size={14} className="mr-1" />
-                Tara
+                {scannerOpen ? "Kapat" : "Tara"}
               </Button>
             </div>
 
@@ -293,6 +302,7 @@ export function NewBookForm({ categories, languages, shelves }: Props) {
                 }
               >
                 <BarcodeScanner
+                  key={scannerKey}
                   onDetected={handleBarcodeDetected}
                   onClose={() => setScannerOpen(false)}
                 />
